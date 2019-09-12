@@ -12,23 +12,44 @@ import RxSwift
 
 class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDelegate, UITableViewDataSource  {
     
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.locationData[0].postalcodes.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
-    }
-    
-    
-    
     let viewModel: SearchViewModel!
     let searchBar: UISearchBar!
     var cancelButtonPressed: hideKeyboard!
     var keyboardHeight: CGFloat!
     var bottomConstraint: NSLayoutConstraint?
     let disposeBag = DisposeBag()
+    var selectedLocationButton: ChangeLocationBasedOnSelection!
+    
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if viewModel.locationData.count != 0 {
+            return viewModel.locationData[0].postalcodes.count
+        }
+        else {
+            return 0
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let dataForCellSetup = viewModel.locationData[0].postalcodes[indexPath.row]
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cellID", for: indexPath) as? LocationTableViewCell else {
+            fatalError("nije settano")
+            
+        }
+        cell.setupCell(data: dataForCellSetup)
+        cell.backgroundColor = .clear
+        cell.selectionStyle = .none
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let data = viewModel.locationData[0].postalcodes[indexPath.row]
+        searchBar.endEditing(true)
+        self.dismiss(animated: false, completion: nil)
+        cancelButtonPressed.hideViewController()
+        selectedLocationButton.didSelectLocation(long: data.lat, lat: data.lng, location: data.placeName)
+    }
     
     let searchView: UIView = {
         let view = UIView()
@@ -73,6 +94,9 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         searchBar.delegate = self
+        tableView.delegate = self
+        tableView.dataSource = self
+        
         prepareForViewModel()
         bindTextFieldWithRx()
         
@@ -84,6 +108,7 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
         self.searchBar.becomeFirstResponder()
     }
     func setupView(){
+        tableView.register(LocationTableViewCell.self, forCellReuseIdentifier: "cellID")
         
         let tap = UILongPressGestureRecognizer(target: self, action: #selector(screenPressed))
         tap.minimumPressDuration = 0
@@ -162,10 +187,9 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
                 return index == 0
             })
             .map({ (index, value) -> String in
-                print(value)
                 return value
             })
-            .debounce(.milliseconds(500), scheduler: ConcurrentDispatchQueueScheduler(qos: .background))
+            .debounce(.milliseconds(300), scheduler: ConcurrentDispatchQueueScheduler(qos: .background))
             .bind(to: viewModel.getLocationSubject)
     }
     

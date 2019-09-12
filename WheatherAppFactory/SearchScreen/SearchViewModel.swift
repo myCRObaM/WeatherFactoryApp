@@ -14,7 +14,7 @@ class SearchViewModel {
     let scheduler: SchedulerType!
     let getLocationSubject = PublishSubject<String>()
     let dataDoneSubject = PublishSubject<Bool>()
-    var locationData: [LocationDataClass]!
+    var locationData = [LocationDataClass]()
     
     init(repository: LocationRepository, scheduler: SchedulerType) {
         self.repository = repository
@@ -24,7 +24,7 @@ class SearchViewModel {
         return subject
             .flatMap{(bool) -> Observable<LocationDataClass> in
                 
-                return self.repository.alamofireRequest("virovitica")
+                return self.repository.alamofireRequest(bool)
             }
             .observeOn(MainScheduler.instance)
             .subscribeOn(scheduler)

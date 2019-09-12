@@ -20,7 +20,7 @@ protocol SearchScreenDelegate {
 
 
 class MainViewController: UIViewController, UISearchBarDelegate{
-
+    
     let viewModel: MainViewModel!
     let disposeBag = DisposeBag()
     var gradientView: GradientView!
@@ -28,6 +28,7 @@ class MainViewController: UIViewController, UISearchBarDelegate{
     var speedUnit: String = "km/h"
     var searchBarCenterY: NSLayoutConstraint!
     var openSearchScreenDelegate: SearchScreenDelegate!
+    var locationText: String = "Zagreb"
     
     
     let gradient: CAGradientLayer = {
@@ -265,7 +266,7 @@ class MainViewController: UIViewController, UISearchBarDelegate{
         bar.backgroundImage = UIImage()
         return bar
     }()
-
+    
     let settingsImage: UIButton = {
         let imageView = UIButton()
         imageView.setImage(UIImage(named: "settings_icon"), for: .normal)
@@ -345,8 +346,8 @@ class MainViewController: UIViewController, UISearchBarDelegate{
         moreInfoStackView.addArrangedSubview(pressureStackView)
         
         
-//        searchBarStackView.addArrangedSubview(settingsImage)
-//        searchBarStackView.addArrangedSubview(searchBar)
+        //        searchBarStackView.addArrangedSubview(settingsImage)
+        //        searchBarStackView.addArrangedSubview(searchBar)
         
         setupConstraints()
         
@@ -368,7 +369,7 @@ class MainViewController: UIViewController, UISearchBarDelegate{
             ])
         
         NSLayoutConstraint.activate([
-           gradientView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            gradientView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             gradientView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             gradientView.bottomAnchor.constraint(equalTo: mainBodyImage.topAnchor, constant: view.bounds.height/5),
             gradientView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -403,12 +404,12 @@ class MainViewController: UIViewController, UISearchBarDelegate{
             settingsImage.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             ])
         setupSearchBarConstraints()
-}
+    }
     
     func setupViewModel(){
         viewModel.getData(subject: viewModel.getDataSubject).disposed(by: disposeBag)
         setupDataCall(subject: viewModel.dataIsDoneLoading).disposed(by: disposeBag)
-        viewModel.getDataSubject.onNext(viewModel.unitMode)
+        viewModel.getDataSubject.onNext(viewModel.locationToUse)
     }
     
     func setupDataCall(subject: PublishSubject<Bool>) -> Disposable{
@@ -438,13 +439,13 @@ class MainViewController: UIViewController, UISearchBarDelegate{
     func setupData(){
         checkForChangesInUnits()
         let weatherData = viewModel.mainWeatherData.currently
-        var currentLocation: String = ""
-        if let index = (viewModel.mainWeatherData.timezone.range(of: "/")?.upperBound){
-            currentLocation = String(viewModel.mainWeatherData.timezone.suffix(from: index))
-        }
+//        var currentLocation: String = ""
+//        if let index = (viewModel.mainWeatherData.timezone.range(of: "/")?.upperBound){
+//            currentLocation = String(viewModel.mainWeatherData.timezone.suffix(from: index))
+//        }
         currentTemperatureLabel.text = String(Int(weatherData.temperature)) + "°"
         currentSummaryLabel.text = weatherData.summary
-        location.text = currentLocation
+        location.text = locationText
         humidityLabel.text = String(Int(weatherData.humidity * 100)) + " %"
         windLabel.text = String((weatherData.windSpeed * 10).rounded()/10) + speedUnit
         pressureLabel.text = String(Int(weatherData.pressure)) + " hpa"
@@ -527,7 +528,7 @@ class MainViewController: UIViewController, UISearchBarDelegate{
         
     }
     @objc func settingPressed(){
-       
+        
     }
     func searchBarPressed(){
         let search = searchBar
@@ -544,5 +545,16 @@ extension MainViewController: hideKeyboard {
     func hideViewController() {
         view.addSubview(searchBar)
         setupSearchBarConstraints()
+        searchBar.text = ""
     }
+}
+
+extension MainViewController: ChangeLocationBasedOnSelection{
+    func didSelectLocation(long: Double, lat: Double, location: String) {
+        viewModel.locationToUse = String(String(long) + "," + String(String(lat)))
+        viewModel.getDataSubject.onNext(viewModel.locationToUse)
+        self.locationText = location
+    }
+    
+    
 }

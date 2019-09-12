@@ -25,6 +25,7 @@ class SearchViewCoordinator: Coordinator {
         let viewModel = SearchViewModel(repository: LocationRepository(), scheduler: ConcurrentDispatchQueueScheduler(qos: .background))
         let viewController = SearchViewController(model: viewModel, searchBar: searchBar)
         viewController.cancelButtonPressed = rootController
+        viewController.selectedLocationButton = rootController
         viewController.modalPresentationStyle = .overFullScreen
         rootController.present(viewController, animated: false) {
             

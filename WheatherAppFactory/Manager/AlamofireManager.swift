@@ -35,9 +35,10 @@ class AlamofireManager {
     }
     
     func requestLocation(url: String) -> Observable<LocationDataClass> {
-        let requestUrl = URL(string: url)!
-        
+      
         return Observable.create{   observable -> Disposable in
+            let escapedString = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+            let requestUrl = URL(string: escapedString)!
             
             Alamofire.request(requestUrl)
                 .responseJSON   { response in
