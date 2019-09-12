@@ -22,7 +22,7 @@ class MainViewModel {
     func getData(subject: ReplaySubject<String>) -> Disposable{
         return subject
             .flatMap{(bool) -> Observable<MainDataClass> in
-                
+                self.dataIsDoneLoading.onNext(false)
                 return self.repository.alamofireRequest(self.unitMode, bool)
         }
             .observeOn(MainScheduler.instance)

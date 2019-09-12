@@ -104,7 +104,9 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         
-      NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         self.searchBar.becomeFirstResponder()
     }
     func setupView(){
@@ -133,10 +135,9 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
             blurryBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             blurryBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
-        bottomConstraint = NSLayoutConstraint(item: searchBar!, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: -20)
+        bottomConstraint = NSLayoutConstraint(item: searchBar!, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: -60)
         
         NSLayoutConstraint.activate([
-            searchBar.heightAnchor.constraint(equalToConstant: 70),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
@@ -167,9 +168,9 @@ class SearchViewController: UIViewController, UISearchBarDelegate, UITableViewDe
             keyboardHeight = keyboardFrame.cgRectValue.height
             
             let isKeyboardShown = notification.name == UIResponder.keyboardWillShowNotification
+            self.bottomConstraint?.constant = isKeyboardShown ? -self.keyboardHeight : -60
             
             UIView.animate(withDuration: 1) {
-                self.bottomConstraint?.constant = isKeyboardShown ? -self.keyboardHeight : -20
                 self.view.layoutIfNeeded()
             }
         }

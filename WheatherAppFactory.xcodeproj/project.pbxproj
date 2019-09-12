@@ -231,10 +231,17 @@
 			children = (
 				F0B3413C232A0F310083FA5A /* SearchViewModel.swift */,
 				F0B3413E232A0F460083FA5A /* SearchViewCoordinator.swift */,
-				F0B34146232A594C0083FA5A /* LocationsTableViewCell.swift */,
 				F0B34140232A0F500083FA5A /* SearchViewController.swift */,
 			);
 			path = SearchScreen;
+			sourceTree = "<group>";
+		};
+		F0B3414E232A70070083FA5A /* TableViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				F0B34146232A594C0083FA5A /* LocationsTableViewCell.swift */,
+			);
+			path = TableViewCell;
 			sourceTree = "<group>";
 		};
 		F0EF431F2327B6F800D2D1F7 = {
@@ -267,6 +274,7 @@
 				F0B341162327C58E0083FA5A /* Classes */,
 				F0B341132327C5610083FA5A /* Delegates */,
 				F0B341192327CC480083FA5A /* Manager */,
+				F0B3414E232A70070083FA5A /* TableViewCell */,
 				F0B3413B232A0F1E0083FA5A /* SearchScreen */,
 				F0B34134232A0EA20083FA5A /* SettingScreen */,
 				F0B341142327C56E0083FA5A /* MainView */,

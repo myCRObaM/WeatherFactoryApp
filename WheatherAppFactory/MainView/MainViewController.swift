@@ -29,6 +29,7 @@ class MainViewController: UIViewController, UISearchBarDelegate{
     var searchBarCenterY: NSLayoutConstraint!
     var openSearchScreenDelegate: SearchScreenDelegate!
     var locationText: String = "Zagreb"
+    var vSpinner : UIView?
     
     
     let gradient: CAGradientLayer = {
@@ -408,16 +409,8 @@ class MainViewController: UIViewController, UISearchBarDelegate{
     
     func setupViewModel(){
         viewModel.getData(subject: viewModel.getDataSubject).disposed(by: disposeBag)
-        setupDataCall(subject: viewModel.dataIsDoneLoading).disposed(by: disposeBag)
+        spinnerControl(subject: viewModel.dataIsDoneLoading).disposed(by: disposeBag)
         viewModel.getDataSubject.onNext(viewModel.locationToUse)
-    }
-    
-    func setupDataCall(subject: PublishSubject<Bool>) -> Disposable{
-        return subject
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: {[unowned self] weather in
-                self.setupData()
-            })
     }
     func setupSearchBar() {
         let searchTextField:UITextField = searchBar.subviews[0].subviews.last as! UITextField
@@ -531,13 +524,49 @@ class MainViewController: UIViewController, UISearchBarDelegate{
         
     }
     func searchBarPressed(){
-        let search = searchBar
-        openSearchScreenDelegate.openSearchScreen(searchBar: search, rootController: self)
+        openSearchScreenDelegate.openSearchScreen(searchBar: searchBar, rootController: self)
     }
     
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
         searchBarPressed()
         return false
+    }
+    
+    func spinnerControl(subject: PublishSubject<Bool>) -> Disposable{
+        return subject
+            .observeOn(MainScheduler.instance)
+            .subscribeOn(viewModel.scheduler)
+            .subscribe(onNext: {[unowned self] bool in
+                switch bool {
+                case true:
+                    self.setupData()
+                    self.removeSpinner()
+                case false:
+                    self.showSpinner(onView: self.view)
+                }
+                
+            })
+    }
+    func showSpinner(onView : UIView) {
+        let spinnerView = UIView.init(frame: onView.bounds)
+        spinnerView.backgroundColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.5)
+        let ai = UIActivityIndicatorView.init(style: .whiteLarge)
+        ai.startAnimating()
+        ai.center = spinnerView.center
+        
+        DispatchQueue.main.async {
+            spinnerView.addSubview(ai)
+            onView.addSubview(spinnerView)
+        }
+        
+        vSpinner = spinnerView
+    }
+    
+    func removeSpinner() {
+        DispatchQueue.main.async {
+            self.vSpinner?.removeFromSuperview()
+            self.vSpinner = nil
+        }
     }
     
 }

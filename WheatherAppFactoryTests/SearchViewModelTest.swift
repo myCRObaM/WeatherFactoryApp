@@ -55,7 +55,8 @@ class SearchViewModelTest: QuickSpec {
                 it("Check if data is loaded into the viewModel"){
                     testScheduler.start()
                     searchViewModel.getLocationSubject.onNext("searchViewModel")
-                
+                    let data = searchViewModel.locationData[0]
+                    expect(data.postalcodes[0].placeName).toEventually(equal(weatherData[0].postalcodes[0].placeName))
                 }
             }
         }
